@@ -1,7 +1,7 @@
 #ifndef __CAPT_H__
 #define __CAPT_H__
 
-#define T_BUFF "/dev/input/mice"
+#define T_BUFF "/dev/input/event1"
 
 #define T_MAX_X 1280
 #define T_MAX_Y 1280
@@ -24,8 +24,7 @@ struct watch_touch{
 	bool press;
 	std::string cmd;
 };
-struct watch_touch thetouch;
+inline struct watch_touch thetouch;
 std::thread init_watch(std::future<void> stop, std::string strcmd);
-void exec_watch();
 std::string get_cmd(int argc, char *argv[]);
 #endif
