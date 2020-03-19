@@ -1,12 +1,12 @@
 #include "capt.h"
 //
-void watch_touch_handler(std::future<void> stop){// read from T_BUFF
+void handler(){// read from T_BUFF and run thetouch.cmd
 	int buf = open(T_BUFF,O_RDONLY|O_NONBLOCK);//open buffer read only
 	if(buf<0){//check for error
 		std::cout<<"error: cant open input buffer"<<std::endl;
 	}//fi
 	struct input_event inev;//struct for buffer read
-	while(stop.wait_for(std::chrono::milliseconds(1))==std::future_status::timeout){//stops on signal
+	while(1){//stops on signal
 		read(buf,&inev,sizeof(struct input_event));//read /dev/input into input event struct
 		if (inev.type==EV_REL){//touch event 
 			std::cout<<"code:"<<inev.code<<std::endl;
@@ -42,18 +42,11 @@ void watch_touch_handler(std::future<void> stop){// read from T_BUFF
 	}//while(end_flag)
 }//watch_touch_handler
 //
-std::thread init_watch(std::future<void> stop, std::string strcmd){//initialise the touch watching thread
-	thetouch.cmd = strcmd; //pass the cmd
-	std::thread touch_thread(watch_touch_handler,std::move(stop)); //thread used to watch for touch event
-	return touch_thread; //return the thread
-}//init_watch
-//
 std::string get_cmd(int argc,char *argv[]){//print the help screen and get cmd for system(cmd)
 	std::string h="-h";//help code 
 	std::string help="--help";//help code
 	if (2<=argc){
 		std::string arg(argv[1]);
-		std::cout<<arg<<std::endl;
 		if (!h.compare(arg)){//compare
 			std::cout<<"usage: capt <other cmd> <other cmd arg1> <other cmd arg2> <etc>"<<std::endl;
 			return "error";
@@ -68,6 +61,7 @@ std::string get_cmd(int argc,char *argv[]){//print the help screen and get cmd f
 		std::string temp = argv[i];//convert to str
 		cmd=cmd+temp+" ";//contatinate
 	}//rof
+	thetouch.cmd=cmd;//add str cmd to struct used by handler
 	return cmd;//return string command
 }//get_cmd
 //
